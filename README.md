@@ -137,6 +137,10 @@ Top Features Influencing Intrusion Detection:
 These features were the strongest indicators of malicious network activity.
 
 ---
+## Results
+<img width="1771" height="876" alt="image" src="https://github.com/user-attachments/assets/d6de12d0-4ebf-4f97-8d8a-f6f06623ecc2" />
+
+---
 
 ## Project Structure
 
