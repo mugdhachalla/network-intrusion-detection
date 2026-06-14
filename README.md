@@ -1,31 +1,26 @@
 # Network Intrusion Detection System
 
-A Machine Learning based cybersecurity application that detects malicious network activity from network traffic data.
+A Machine Learning based cybersecurity application for detecting malicious network activity using both supervised and unsupervised learning techniques.
 
-The system analyzes network connection features and classifies traffic as either:
+The system analyzes network traffic data and classifies connections as:
 
 * Normal Traffic
 * Intrusion / Attack
 
-Built using Python, Scikit Learn, Random Forest, and Streamlit.
+Built using Python, Scikit Learn, TensorFlow, Random Forest, Autoencoders, and Streamlit.
 
 ---
 
 ## Features
 
-Intrusion Detection
-
-Attack Classification
-
-CSV Upload Support
-
-Real Time Predictions
-
-Attack Percentage Analysis
-
-Downloadable Results
-
-Interactive Streamlit Interface
+* Intrusion Detection using Random Forest
+* Autoencoder Based Anomaly Detection
+* CSV Upload Support
+* Real Time Predictions
+* Network Risk Assessment
+* Feature Importance Visualization
+* Downloadable Results
+* Interactive Streamlit Dashboard
 
 ---
 
@@ -37,10 +32,12 @@ Interactive Streamlit Interface
 * Pandas
 * NumPy
 * Scikit Learn
+* TensorFlow
 
-### Model
+### Models
 
 * Random Forest Classifier
+* Autoencoder
 
 ### Deployment
 
@@ -50,16 +47,14 @@ Interactive Streamlit Interface
 
 ## Dataset
 
-NSL-KDD Dataset
+NSL KDD Dataset
 
-https://www.kaggle.com/datasets/hassan06/nslkdd
-
-Files Used:
+Files Included:
 
 * KDDTrain+.txt
 * KDDTest+.txt
 
-The dataset contains network traffic features including:
+The dataset contains network traffic information such as:
 
 * Protocol Type
 * Service
@@ -79,16 +74,16 @@ Target Variable:
 
 ## Machine Learning Pipeline
 
-### 1. Data Preprocessing
+### Data Preprocessing
 
-* Loaded training and testing datasets
-* Converted attack labels into binary classification
-* Encoded categorical features
-* Aligned train and test feature spaces
+* Binary attack classification
+* One Hot Encoding of categorical features
+* Train and test feature alignment
+* Feature scaling for Autoencoder training
 
-### 2. Feature Engineering
+### Feature Engineering
 
-Applied One Hot Encoding to:
+Applied encoding to:
 
 * protocol_type
 * service
@@ -96,9 +91,7 @@ Applied One Hot Encoding to:
 
 Generated 120+ machine learning features.
 
-### 3. Model Development
-
-Trained a Random Forest Classifier using network traffic features.
+### Random Forest Model
 
 Configuration:
 
@@ -106,16 +99,30 @@ Configuration:
 * max_depth = 20
 * min_samples_split = 5
 
-### 4. Model Evaluation
+### Autoencoder Model
 
-Performance on the test dataset:
+* Trained only on normal network traffic
+* Reconstruction error based anomaly detection
+* Compared against supervised classification performance
 
-| Metric    | Score              |
-| --------- | ------------------ |
-| Accuracy  | 77.3%              |
-| Precision | 97% (Attack Class) |
-| Recall    | 62% (Attack Class) |
-| F1 Score  | 76%                |
+---
+
+## Model Performance
+
+### Random Forest
+
+| Metric    | Score |
+| --------- | ----- |
+| Accuracy  | 77.3% |
+| Precision | 97%   |
+| Recall    | 62%   |
+| F1 Score  | 76%   |
+
+### Autoencoder
+
+* Normal Traffic Mean Reconstruction Error: 0.0028
+* Attack Traffic Mean Reconstruction Error: 0.0337
+* Attack traffic generated approximately 12× higher reconstruction error than normal traffic.
 
 ---
 
@@ -134,11 +141,26 @@ Top Features Influencing Intrusion Detection:
 | diff_srv_rate          | 0.042      |
 | logged_in              | 0.041      |
 
-These features were the strongest indicators of malicious network activity.
+These features were the strongest indicators of malicious activity.
 
 ---
-## Results
-<img width="1771" height="876" alt="image" src="https://github.com/user-attachments/assets/d6de12d0-4ebf-4f97-8d8a-f6f06623ecc2" />
+
+## Application Preview
+
+![Application Screenshot](image.png)
+
+---
+
+## Sample Test Files
+
+The repository includes sample files for testing:
+
+* sample_network_traffic.csv
+* normal_traffic.csv
+* attack_traffic.csv
+* demo_network_traffic.csv
+
+These files can be uploaded directly into the Streamlit application.
 
 ---
 
@@ -150,14 +172,17 @@ NetworkIntrusionDetection/
 ├── app.py
 ├── intrusion.ipynb
 ├── model.pkl
+├── columns.pkl
 ├── feature_importance.csv
-├── attack_traffic.csv
 ├── KDDTrain+.txt
 ├── KDDTest+.txt
-├── normal_traffic.csv
 ├── sample_network_traffic.csv
+├── normal_traffic.csv
+├── attack_traffic.csv
+├── demo_network_traffic.csv
 ├── requirements.txt
 ├── README.md
+└── image.png
 ```
 
 ---
@@ -166,10 +191,11 @@ NetworkIntrusionDetection/
 
 ```bash
 git clone https://github.com/mugdhachalla/network-intrusion-detection.git
+
 cd network-intrusion-detection
 ```
 
-Create virtual environment:
+Create a virtual environment:
 
 ```bash
 python -m venv ml-env
@@ -177,7 +203,7 @@ python -m venv ml-env
 
 Activate:
 
-Linux / macOS
+Linux/macOS
 
 ```bash
 source ml-env/bin/activate
@@ -203,7 +229,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Application:
+Application URL:
 
 ```text
 http://localhost:8501
@@ -213,15 +239,16 @@ http://localhost:8501
 
 ## Learning Outcomes
 
-This project provided practical experience in:
+This project provided hands on experience with:
 
 * Cybersecurity Machine Learning
 * Intrusion Detection Systems
-* Data Preprocessing
-* One Hot Encoding
 * Random Forest Classification
-* Feature Importance Analysis
+* Autoencoder Based Anomaly Detection
+* Feature Engineering
+* One Hot Encoding
 * Model Evaluation
+* Feature Importance Analysis
 * Streamlit Deployment
 
 ---

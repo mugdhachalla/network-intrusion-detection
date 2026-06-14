@@ -30,15 +30,6 @@ st.markdown(
 
         h1, h2, h3, h4, h5, h6 {
             color: #f5fbff;
-            letter-spacing: 0.01em;
-        }
-
-        p, label, span, div {
-            color: inherit;
-        }
-
-        .stMarkdown, .stText, .stDataFrame, .stMetric {
-            color: #e5eef8;
         }
 
         div[data-testid="stFileUploader"] {
@@ -46,63 +37,58 @@ st.markdown(
             border: 1px solid rgba(102, 194, 255, 0.22);
             border-radius: 16px;
             padding: 1rem;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
         }
 
         div[data-testid="stMetric"] {
-            background: linear-gradient(180deg, rgba(16, 33, 50, 0.95), rgba(10, 19, 29, 0.95));
+            background: linear-gradient(
+                180deg,
+                rgba(16, 33, 50, 0.95),
+                rgba(10, 19, 29, 0.95)
+            );
             border: 1px solid rgba(102, 194, 255, 0.18);
             border-radius: 16px;
-            padding: 1rem 1.1rem;
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
-        }
-
-        div[data-testid="stMetric"] label,
-        div[data-testid="stMetric"] div {
-            color: #e5eef8 !important;
+            padding: 1rem;
         }
 
         .stButton > button,
         .stDownloadButton > button {
-            background: linear-gradient(135deg, #2ab3ff 0%, #3d7eff 100%);
-            color: #ffffff;
+            background: linear-gradient(
+                135deg,
+                #2ab3ff 0%,
+                #3d7eff 100%
+            );
+            color: white;
             border: none;
             border-radius: 999px;
-            padding: 0.6rem 1.1rem;
             font-weight: 600;
-            box-shadow: 0 10px 24px rgba(61, 126, 255, 0.32);
         }
 
         .stButton > button:hover,
         .stDownloadButton > button:hover {
-            background: linear-gradient(135deg, #47c4ff 0%, #4f8cff 100%);
-            color: #ffffff;
-            border: none;
-        }
-
-        .stProgress > div > div > div > div {
-            background: linear-gradient(90deg, #2ab3ff 0%, #4fd1c5 100%);
-        }
-
-        [data-testid="stDataFrame"] {
-            background: rgba(9, 20, 33, 0.72);
-            border: 1px solid rgba(102, 194, 255, 0.18);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+            color: white;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.title("Network Intrusion Detection System")
+st.title("🛡️ Network Intrusion Detection System")
 
-st.write(
-    "Upload network traffic data and detect potential attacks using Machine Learning."
+st.markdown(
+    """
+    Detect malicious network activity using Machine Learning.
+
+    **Dataset:** NSL KDD  
+    **Primary Model:** Random Forest Classifier  
+    **Additional Experiment:** Autoencoder Based Anomaly Detection
+    """
 )
 
-model = pickle.load(open("model.pkl", "rb"))
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+with open("columns.pkl", "rb") as f:
+    columns = pickle.load(f)
 
 uploaded_file = st.file_uploader(
     "Upload Network Traffic CSV",
@@ -111,27 +97,72 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
 
-    data = pd.read_csv(uploaded_file)
-
-    st.subheader("Uploaded Data")
-
-    st.dataframe(data.head())
-
     try:
+
+        data = pd.read_csv(uploaded_file)
+
+        if "Prediction" in data.columns:
+            data = data.drop(
+                columns=["Prediction"]
+            )
+
+        missing_cols = set(columns) - set(data.columns)
+
+        if missing_cols:
+
+            st.error(
+                f"Missing columns: {list(missing_cols)}"
+            )
+
+            st.stop()
+
+        extra_cols = set(data.columns) - set(columns)
+
+        if extra_cols:
+
+            st.warning(
+                f"Ignoring extra columns: {list(extra_cols)}"
+            )
+
+        data = data[columns]
+
+        st.subheader("Uploaded Data")
+
+        st.dataframe(
+            data.head()
+        )
 
         predictions = model.predict(data)
 
         data["Prediction"] = predictions
 
-        attack_count = (predictions == 1).sum()
+        attack_count = (
+            predictions == 1
+        ).sum()
 
-        normal_count = (predictions == 0).sum()
+        normal_count = (
+            predictions == 0
+        ).sum()
 
         total = len(predictions)
 
-        st.subheader("Detection Summary")
+        attack_percentage = (
+            attack_count / total
+        ) * 100
 
-        col1, col2, col3 = st.columns(3)
+        risk_level = (
+            "🔴 High Risk"
+            if attack_percentage > 50
+            else "🟡 Medium Risk"
+            if attack_percentage > 20
+            else "🟢 Low Risk"
+        )
+
+        st.subheader(
+            "Detection Summary"
+        )
+
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             st.metric(
@@ -151,9 +182,11 @@ if uploaded_file is not None:
                 normal_count
             )
 
-        attack_percentage = (
-            attack_count / total
-        ) * 100
+        with col4:
+            st.metric(
+                "Network Risk",
+                risk_level
+            )
 
         st.progress(
             attack_percentage / 100
@@ -163,9 +196,80 @@ if uploaded_file is not None:
             f"Attack Percentage: {attack_percentage:.2f}%"
         )
 
-        st.subheader("Prediction Results")
+        st.markdown("---")
 
-        st.dataframe(data)
+        st.subheader(
+            "Model Insights"
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.info(
+                """
+                **Random Forest Classifier**
+
+                • Accuracy: 77.3%
+
+                • 120+ engineered features
+
+                • Supervised intrusion detection
+
+                • Best performing model
+                """
+            )
+
+        with col2:
+
+            st.info(
+                """
+                **Autoencoder Anomaly Detection**
+
+                • Trained on normal traffic only
+
+                • Normal Error: 0.0028
+
+                • Attack Error: 0.0337
+
+                • ~12× higher anomaly score for attacks
+                """
+            )
+
+        try:
+
+            importance = pd.read_csv(
+                "feature_importance.csv"
+            )
+
+            st.subheader(
+                "Top Attack Indicators"
+            )
+
+            top_features = (
+                importance
+                .head(10)
+            )
+
+            st.bar_chart(
+                top_features.set_index(
+                    "Feature"
+                )["Importance"]
+            )
+
+        except:
+
+            st.warning(
+                "feature_importance.csv not found."
+            )
+
+        st.subheader(
+            "Prediction Results"
+        )
+
+        st.dataframe(
+            data
+        )
 
         csv = data.to_csv(
             index=False
